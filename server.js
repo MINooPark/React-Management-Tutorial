@@ -1,3 +1,4 @@
+const fs = require('fs');
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
@@ -5,6 +6,28 @@ const port = process.env.PORT || 5000;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+const data = fs.readFileSync('./database.json');
+const conf = JSON.parse(data);
+const mysql = require('mysql');
+
+const connection = mysql.createConnection({
+  host: mysql.host,
+  user: mysql.user,
+  password: mysql.password,
+  port: mysql.port,
+  database: mysql.database
+});
+connection.connect();
+
+app.get('/api/DB/customers', (req,res) => {
+  connection.query(
+    "SELECT * FROM CUSTOMER",
+    (err, rows, fields) => {
+      res.send(rows);
+    }
+  );
+});
 
 app.get('/api/hello', (req, res) => {
     res.send({message: 'Hello Express!'});
